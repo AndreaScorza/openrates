@@ -3,6 +3,7 @@ package com.andrea.openrates.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,7 +30,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -330,8 +330,14 @@ private fun WatchlistCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.weight(1f),
                 )
-                TextButton(onClick = onAdd, modifier = Modifier.testTag(Tags.ADD_WATCH)) {
-                    Text("Add")
+                // A tonal container rather than bare text: with no accent colour in the
+                // palette, shape is the only thing left to say "this is tappable".
+                FilledTonalButton(
+                    onClick = onAdd,
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                    modifier = Modifier.testTag(Tags.ADD_WATCH),
+                ) {
+                    Text("Add", style = MaterialTheme.typography.labelLarge)
                 }
             }
             if (entries.isEmpty()) {
