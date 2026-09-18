@@ -3,10 +3,20 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
+    <!-- Two coins, one behind the other, drawn in the 108dp adaptive-icon viewport and
+         kept inside the 66dp safe circle (this mark reaches 30.5 of the 33dp radius).
+
+         Both coins are r20, centres 21dp apart on the diagonal, and the pair is centred
+         on the frame rather than on either coin.
+
+         The back coin is its own circle minus the front coin grown by a 4dp gap, cut at
+         the real circle-circle intersection rather than masked with a background-coloured
+         shape: the monochrome/themed icon paints every path one colour, so a faked gap
+         would fill in and the two coins would merge into one blob. -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M30,42 h38 v-9 l18,13 -18,13 v-9 h-38 z" />
+        android:pathData="M64.46,37.62 A20,20 0 1 0 37.62,64.46 A24,24 0 0 1 64.46,37.62 Z" />
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M78,69 h-38 v9 l-18,-13 18,-13 v9 h38 z" />
+        android:pathData="M61.42,41.42 a20,20 0 1 0 0,40 a20,20 0 1 0 0,-40 Z" />
 </vector>
