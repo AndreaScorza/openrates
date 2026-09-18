@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 /** Stable identifiers the instrumented end-to-end tests drive the screen with. */
 object Tags {
     const val AMOUNT = "amount_field"
+    const val CLEAR_AMOUNT = "clear_amount_button"
     const val RESULT = "result_text"
     const val RATE = "rate_text"
     const val FROM = "from_button"
@@ -213,6 +214,25 @@ private fun ConversionCard(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     textStyle = MaterialTheme.typography.headlineSmall,
+                    // Clearing also clears what is remembered for the next launch:
+                    // onAmountChange persists every edit, blank included.
+                    trailingIcon = {
+                        if (state.amountInput.isNotEmpty()) {
+                            IconButton(
+                                onClick = { onAmountChange("") },
+                                modifier = Modifier
+                                    .testTag(Tags.CLEAR_AMOUNT)
+                                    .semantics { contentDescription = "Clear amount" },
+                            ) {
+                                Icon(
+                                    Icons.Filled.Close,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    },
                     modifier = Modifier.weight(1f).testTag(Tags.AMOUNT),
                 )
                 CurrencyChip(

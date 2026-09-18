@@ -11,6 +11,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.andrea.openrates.ui.PICKER_SEARCH_TAG
 import com.andrea.openrates.ui.Tags
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -62,6 +63,26 @@ class ConverterE2ETest {
         val after = textOf(Tags.RESULT)
         assertNotEquals("result should track the amount", before, after)
         assertTrue("expected a numeric result, got '$after'", after.any { it.isDigit() })
+    }
+
+    @Test
+    fun clearingTheAmountEmptiesItAndTheResult() {
+        awaitRates()
+
+        rule.onNodeWithTag(Tags.AMOUNT).performTextClearance()
+        rule.onNodeWithTag(Tags.AMOUNT).performTextInput("250")
+        rule.waitForIdle()
+        assertTrue("expected a numeric result first", textOf(Tags.RESULT).any { it.isDigit() })
+
+        rule.onNodeWithTag(Tags.CLEAR_AMOUNT).performClick()
+        rule.waitForIdle()
+
+        assertEquals("result should fall back to the placeholder", "—", textOf(Tags.RESULT))
+        // The button only renders for a non-empty field, so its absence is the field being empty.
+        assertTrue(
+            "the clear button should disappear once the field is empty",
+            rule.onAllNodesWithTagSafe(Tags.CLEAR_AMOUNT).isEmpty(),
+        )
     }
 
     @Test
