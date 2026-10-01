@@ -51,6 +51,14 @@ android {
     }
 }
 
+androidComponents {
+    beforeVariants(selector().withBuildType("release")) { variant ->
+        // JVM tests run the same sources in both variants, and the screenshot tests
+        // need the Compose test activity, which only debug builds declare.
+        variant.enableUnitTest = false
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
