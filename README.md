@@ -25,24 +25,27 @@ network is unavailable.
 
 ## How the rates work
 
-The app uses three Frankfurter v2 endpoints, each for what it is best at:
+The app uses two Frankfurter v2 endpoints, each for what it is best at:
 
 | Endpoint | Used for |
 | --- | --- |
 | `GET /v2/rates?base=EUR` | The **offline snapshot** — every currency in one ~10 KB response. |
-| `GET /v2/rate/{base}/{quote}` | The **headline pair**, so the main number is a published rate rather than a derived one. |
-| `GET /v2/rates?base=X&quotes=A,B,C` | The **watchlist**, several quotes in a single request. |
+| `GET /v2/rates?base=EUR&quotes=A,B,C` | **Live rates** for the currencies on screen, in a single request. |
 | `GET /v2/currencies` | Currency display names, cached once. |
 
-**Offline conversion.** The cached snapshot is always stored against EUR, and any other
-pair is triangulated locally:
+**Every pair is crossed from EUR.** Both live and cached rates are fetched against EUR,
+and any other pair is triangulated locally:
 
 ```
 rate(A → B) = rate(EUR → B) / rate(EUR → A)
 ```
 
 So a single cached response covers every pair the app offers, not just the ones you looked
-at while online. Two details the API forces you to handle, both of which the app respects:
+at while online. It is also more precise than asking for the pair directly. A pair is
+printed to a few decimals, which is plenty for EUR → HKD (8.9136) but leaves two or three
+digits from a currency with small units: 1,000,000 KRW → GBP comes out as 560.00 instead
+of 556.39, and IDR → gold as 0. The EUR legs keep five significant digits, so the cross
+stays within about 0.002% for every pair. Two details the API forces you to handle, both of which the app respects:
 
 - `/v2/rates` returns a **flat JSON array**, not a map keyed by currency.
 - Quote **dates differ per currency** — illiquid ones lag by a day — so the date is stored

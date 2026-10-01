@@ -369,7 +369,9 @@ private fun WatchlistCard(
     onRemove: (String) -> Unit,
     onAdd: () -> Unit,
 ) {
-    val entries = state.watchlist.filter { it != state.from }
+    // Every watched currency stays listed, the amount's own included, so swapping
+    // never makes a row appear or disappear.
+    val entries = state.watchlist
     Card(modifier = Modifier.testTag(Tags.WATCHLIST)) {
         Column(modifier = Modifier.padding(vertical = 8.dp)) {
             Row(
