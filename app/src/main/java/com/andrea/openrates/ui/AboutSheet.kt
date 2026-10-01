@@ -89,11 +89,11 @@ fun AboutSheet(onDismiss: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
             )
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedButton(onClick = { uriHandler.openUri(FRANKFURTER_URL) }) {
-                    Text("frankfurter.dev")
-                }
                 OutlinedButton(onClick = { uriHandler.openUri(SOURCE_URL) }) {
                     Text("Source code")
+                }
+                OutlinedButton(onClick = { uriHandler.openUri(FRANKFURTER_URL) }) {
+                    Text("frankfurter.dev")
                 }
             }
 

@@ -56,6 +56,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.ui.unit.sp
 
 /** Stable identifiers the instrumented end-to-end tests drive the screen with. */
@@ -100,14 +103,6 @@ fun ConverterScreen(
                 windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
                 actions = {
                     IconButton(
-                        onClick = { showAbout = true },
-                        modifier = Modifier
-                            .testTag(Tags.ABOUT)
-                            .semantics { contentDescription = "About" },
-                    ) {
-                        Icon(Icons.Outlined.Info, contentDescription = null)
-                    }
-                    IconButton(
                         onClick = onRefresh,
                         enabled = !state.isRefreshing,
                         modifier = Modifier
@@ -142,7 +137,7 @@ fun ConverterScreen(
             modifier = Modifier.widthIn(max = MaxContentWidth).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            StatusLine(state)
+            StatusLine(state, onAbout = { showAbout = true })
             ConversionCard(
                 state = state,
                 onAmountChange = onAmountChange,
@@ -202,7 +197,7 @@ private val NarrowCardWidth = 300.dp
 
 /** "Updated 3 min ago · rates for 2026-09-02", or the offline explanation. */
 @Composable
-private fun StatusLine(state: ConverterUiState) {
+private fun StatusLine(state: ConverterUiState, onAbout: () -> Unit) {
     val snapshot = state.snapshot
     val text = when {
         state.statusMessage != null && snapshot == null -> state.statusMessage
@@ -232,6 +227,27 @@ private fun StatusLine(state: ConverterUiState) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.testTag(Tags.STATUS),
         )
+        // The way into About sits beside the rates' date, as "about these rates".
+        // The icon is 16dp to stay quiet; its touch area is a full 48dp but laid
+        // out at 16dp, so the line keeps its height and nothing below it moves.
+        Box(Modifier.size(16.dp), contentAlignment = Alignment.Center) {
+            Box(
+                modifier = Modifier
+                    .requiredSize(48.dp)
+                    .clip(CircleShape)
+                    .clickable(onClick = onAbout)
+                    .testTag(Tags.ABOUT)
+                    .semantics { contentDescription = "About" },
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Outlined.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
     }
 }
 
