@@ -82,6 +82,12 @@ fun AboutSheet(onDismiss: () -> Unit) {
             }
 
             Text(
+                "The source code is free to read and use for noncommercial purposes, under " +
+                    "the PolyForm Noncommercial License 1.0.0. The name and icon are not licensed.",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+
+            Text(
                 "Rates come from Frankfurter, which collects the reference rates published " +
                     "by the European Central Bank and other central banks. They are updated " +
                     "about once a day and are for information: banks and card providers " +

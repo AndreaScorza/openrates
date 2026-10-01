@@ -142,4 +142,15 @@ Frankfurter is free and needs no API key; please be kind to it.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+OpenRates is source-available under the
+[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0):
+you can read, build, change and share it for any noncommercial purpose, such as personal
+use, study or a hobby project. Selling it, putting ads in it, or using it in any other way
+to make money is not permitted. See [LICENSE](LICENSE).
+
+The name "OpenRates" and the icon are not covered by the license: a version of your own
+needs its own name and icon.
+
+Versions published before 2 October 2026 were released under the MIT License and remain
+available under it. The libraries the app uses keep their own licenses (Apache 2.0, and
+MPL 2.0 for the Public Suffix List in OkHttp), listed in the app under About.
