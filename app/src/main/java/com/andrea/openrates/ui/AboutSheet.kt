@@ -82,8 +82,9 @@ fun AboutSheet(onDismiss: () -> Unit) {
             }
 
             Text(
-                "The source code is free to read and use for noncommercial purposes, under " +
-                    "the PolyForm Noncommercial License 1.0.0. The name and icon are not licensed.",
+                "OpenRates is free software under the GNU GPL v3: you can use, study, change " +
+                    "and share it, as long as your version stays open too. The name and icon are " +
+                    "not licensed.",
                 style = MaterialTheme.typography.bodyMedium,
             )
 
