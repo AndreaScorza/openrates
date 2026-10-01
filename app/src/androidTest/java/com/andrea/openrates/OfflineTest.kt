@@ -50,7 +50,6 @@ class OfflineTest {
         // 2. A fresh repository that cannot reach the network at all.
         val offline = RatesRepository(FrankfurterApi(baseUrl = unreachable), RatesCache(context, directory))
         assertTrue("refresh should fail while offline", offline.refresh("EUR").isFailure)
-        assertTrue("live pair should fail while offline", offline.livePair("EUR", "USD").isFailure)
 
         // 3. The cached snapshot still answers, for pairs that do not involve the base.
         val snapshot = offline.cachedSnapshot()

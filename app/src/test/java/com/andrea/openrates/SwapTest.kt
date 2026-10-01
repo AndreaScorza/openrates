@@ -1,5 +1,6 @@
 package com.andrea.openrates
 
+import com.andrea.openrates.data.RatesSnapshot
 import com.andrea.openrates.ui.ConverterUiState
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -14,7 +15,7 @@ class SwapTest {
         from = "EUR",
         to = "HKD",
         watchlist = listOf("GBP", "JPY", "HKD"),
-        liveQuotes = eurRates,
+        snapshot = RatesSnapshot(base = "EUR", rates = eurRates, fetchedAtEpochMs = 0),
     )
 
     @Test

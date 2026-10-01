@@ -28,6 +28,15 @@ class FrankfurterApiTest {
     fun tearDown() = server.shutdown()
 
     @Test
+    fun `requests name the app`() = runBlocking {
+        server.enqueue(MockResponse().setBody("[]"))
+        api.rates("EUR")
+
+        val agent = server.takeRequest().getHeader("User-Agent").orEmpty()
+        assertTrue("unexpected User-Agent: $agent", agent.startsWith("OpenRates/"))
+    }
+
+    @Test
     fun `single pair endpoint returns an object`() = runBlocking {
         server.enqueue(
             MockResponse().setBody("""{"date":"2026-09-02","base":"EUR","quote":"USD","rate":1.1603}""")

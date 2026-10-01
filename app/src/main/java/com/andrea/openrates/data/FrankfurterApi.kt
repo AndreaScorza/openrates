@@ -1,5 +1,6 @@
 package com.andrea.openrates.data
 
+import com.andrea.openrates.BuildConfig
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
@@ -16,11 +17,10 @@ class FrankfurterException(val status: Int, override val message: String) : IOEx
 /**
  * Thin client for the Frankfurter v2 API (https://api.frankfurter.dev).
  *
- * Endpoints used:
- *  - `GET /v2/rate/{base}/{quote}`          single pair, freshest value for the converter
- *  - `GET /v2/rates?base=X&quotes=A,B,C`    several quotes at once, for the watchlist
- *  - `GET /v2/rates?base=X`                 every quote, cached as the offline snapshot
- *  - `GET /v2/currencies`                   ISO code -> display name
+ * The app uses two endpoints: `GET /v2/rates?base=EUR`, every quote in one
+ * response that serves every pair (see [RatesSnapshot]), and `GET /v2/currencies`
+ * for display names. [rate] and the `quotes` filter complete the client but are
+ * deliberately unused: a pair asked for directly is coarser than one crossed from EUR.
  */
 class FrankfurterApi(
     private val baseUrl: HttpUrl = DEFAULT_BASE_URL.toHttpUrl(),
@@ -93,7 +93,17 @@ class FrankfurterApi(
     companion object {
         const val DEFAULT_BASE_URL = "https://api.frankfurter.dev/"
 
+        /**
+         * Names the app to the API, so its traffic reads as one known client rather
+         * than anonymous scraping (OkHttp's default is just "okhttp/4.x").
+         */
+        val USER_AGENT =
+            "OpenRates/${BuildConfig.VERSION_NAME} (Android; +https://github.com/AndreaScorza/openrates)"
+
         fun defaultClient(): OkHttpClient = OkHttpClient.Builder()
+            .addInterceptor { chain ->
+                chain.proceed(chain.request().newBuilder().header("User-Agent", USER_AGENT).build())
+            }
             .connectTimeout(10, TimeUnit.SECONDS)
             .readTimeout(10, TimeUnit.SECONDS)
             .callTimeout(20, TimeUnit.SECONDS)

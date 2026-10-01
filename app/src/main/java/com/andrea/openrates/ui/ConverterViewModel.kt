@@ -9,26 +9,27 @@ import com.andrea.openrates.data.Conversion
 import com.andrea.openrates.data.RatesRepository
 import com.andrea.openrates.data.RatesSnapshot
 import com.andrea.openrates.data.Settings
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.TimeUnit
 
 data class ConverterUiState(
     val amountInput: String = "1",
     val from: String = "EUR",
     val to: String = "USD",
+    /**
+     * Every EUR rate in one download. Each pair is crossed from it rather than asked
+     * for directly: Frankfurter prints a pair to a few decimals, so from a currency
+     * with small units it keeps two or three digits (1M KRW -> GBP comes out 560.00
+     * instead of 556.39), while the EUR legs keep five.
+     */
     val snapshot: RatesSnapshot? = null,
     val names: Map<String, String> = emptyMap(),
     val watchlist: List<String> = emptyList(),
-    /**
-     * Live EUR -> code rates for the currencies on screen. Empty when offline.
-     * Every pair is crossed from these: Frankfurter prints a pair to a few decimals,
-     * so from a currency with small units it keeps two or three digits
-     * (1M KRW -> GBP comes out 560.00 instead of 556.39), while the EUR legs keep five.
-     */
-    val liveQuotes: Map<String, Double> = emptyMap(),
     val isRefreshing: Boolean = false,
     val isOffline: Boolean = false,
     val statusMessage: String? = null,
@@ -45,14 +46,7 @@ data class ConverterUiState(
     val availableCurrencies: List<String>
         get() = snapshot?.currencies ?: listOf("EUR", "USD", "GBP", "JPY", "CHF")
 
-    fun rateFor(quote: String): Double? {
-        if (quote == from) return 1.0
-        val fromEur = eurRate(from, liveQuotes)
-        val quoteEur = eurRate(quote, liveQuotes)
-        // Both legs from the same source, so a live and a cached rate are never mixed.
-        if (fromEur != null && quoteEur != null && fromEur != 0.0) return quoteEur / fromEur
-        return snapshot?.let { Conversion.rate(it, from, quote) }
-    }
+    fun rateFor(quote: String): Double? = snapshot?.let { Conversion.rate(it, from, quote) }
 
     /**
      * Swaps the direction and keeps the typed number: 35 EUR -> HKD becomes
@@ -64,9 +58,6 @@ data class ConverterUiState(
         /** Accepts both `1,5` and `1.5` so the app works with any keyboard locale. */
         fun parseAmount(input: String): Double? =
             input.replace(',', '.').trim().toDoubleOrNull()
-
-        private fun eurRate(code: String, live: Map<String, Double>): Double? =
-            if (code == ConverterViewModel.SNAPSHOT_BASE) 1.0 else live[code]
     }
 }
 
@@ -86,18 +77,15 @@ class ConverterViewModel(
     )
     val state: StateFlow<ConverterUiState> = _state.asStateFlow()
 
-    init {
-        viewModelScope.launch {
-            // Cached data first so the screen is useful before the network answers.
-            val cached = repository.cachedSnapshot()
-            val names = repository.cachedNames()
-            _state.update {
-                it.copy(
-                    snapshot = cached ?: it.snapshot,
-                    names = names?.names ?: it.names,
-                )
-            }
-            refresh()
+    /** Cached data first, so the screen is useful before the network answers. */
+    private val cacheLoaded = viewModelScope.async {
+        val cached = repository.cachedSnapshot()
+        val names = repository.cachedNames()
+        _state.update {
+            it.copy(
+                snapshot = cached ?: it.snapshot,
+                names = names?.names ?: it.names,
+            )
         }
     }
 
@@ -108,16 +96,16 @@ class ConverterViewModel(
         settings.amount = filtered
     }
 
+    // Picking, swapping and watching need no network: the snapshot covers every pair.
+
     fun onFromChange(code: String) {
         _state.update { it.copy(from = code) }
         settings.from = code
-        refreshLive()
     }
 
     fun onToChange(code: String) {
         _state.update { it.copy(to = code) }
         settings.to = code
-        refreshLive()
     }
 
     fun onSwap() {
@@ -125,7 +113,6 @@ class ConverterViewModel(
         _state.value = swapped
         settings.from = swapped.from
         settings.to = swapped.to
-        // The EUR rates on screen already cover both currencies: nothing to fetch.
     }
 
     fun onToggleWatch(code: String) {
@@ -134,14 +121,27 @@ class ConverterViewModel(
         }
         _state.update { it.copy(watchlist = updated) }
         settings.watchlist = updated
-        refreshLive()
     }
 
-    /** Full refresh: snapshot for offline use, plus live values for what is on screen. */
+    /**
+     * Called whenever the app comes to the foreground. Rates are published about
+     * once a day, so a snapshot under [STALE_AFTER_MS] old is kept as is; the
+     * refresh button still forces a download.
+     */
+    fun refreshIfStale(now: Long = System.currentTimeMillis()) {
+        viewModelScope.launch {
+            cacheLoaded.await()
+            val fetchedAt = _state.value.snapshot?.fetchedAtEpochMs
+            if (fetchedAt == null || now - fetchedAt >= STALE_AFTER_MS) refresh()
+        }
+    }
+
+    /** Downloads every EUR rate (one ~10 KB request) and keeps it for offline use. */
     fun refresh() {
         if (_state.value.isRefreshing) return
+        // Set before launching, so a second call in the same frame sees it.
+        _state.update { it.copy(isRefreshing = true, statusMessage = null) }
         viewModelScope.launch {
-            _state.update { it.copy(isRefreshing = true, statusMessage = null) }
             val result = repository.refresh(SNAPSHOT_BASE)
             result.onSuccess { snapshot ->
                 _state.update { it.copy(snapshot = snapshot, isOffline = false) }
@@ -158,33 +158,7 @@ class ConverterViewModel(
                     )
                 }
             }
-            fetchLive()
             _state.update { it.copy(isRefreshing = false) }
-        }
-    }
-
-    private fun refreshLive() {
-        viewModelScope.launch { fetchLive() }
-    }
-
-    /**
-     * One multi-quote call against EUR for every currency on screen; the
-     * headline and the watchlist are both crossed from it (see [ConverterUiState.liveQuotes]).
-     */
-    private suspend fun fetchLive() {
-        val current = _state.value
-        val codes = (current.watchlist + current.from + current.to).distinct() - SNAPSHOT_BASE
-        val quotes = repository.liveQuotes(SNAPSHOT_BASE, codes)
-        if (quotes.isFailure) {
-            _state.update {
-                it.copy(isOffline = true, statusMessage = offlineMessage(it.snapshot, null))
-            }
-            return
-        }
-        val live = quotes.getOrThrow().associate { it.quote to it.rate }
-        // Merged, not replaced: a currency picked meanwhile keeps its rate.
-        _state.update {
-            it.copy(liveQuotes = it.liveQuotes + live, isOffline = false, statusMessage = null)
         }
     }
 
@@ -200,6 +174,9 @@ class ConverterViewModel(
          * every currency in one 10 KB call, and any other pair is derived from it.
          */
         const val SNAPSHOT_BASE = "EUR"
+
+        /** Older than this, coming back to the app downloads fresh rates. */
+        val STALE_AFTER_MS = TimeUnit.HOURS.toMillis(1)
 
         fun factory(application: Application): ViewModelProvider.Factory =
             object : ViewModelProvider.Factory {

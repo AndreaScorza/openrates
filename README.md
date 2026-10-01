@@ -25,16 +25,20 @@ network is unavailable.
 
 ## How the rates work
 
-The app uses two Frankfurter v2 endpoints, each for what it is best at:
+The app uses two Frankfurter v2 endpoints:
 
 | Endpoint | Used for |
 | --- | --- |
-| `GET /v2/rates?base=EUR` | The **offline snapshot** — every currency in one ~10 KB response. |
-| `GET /v2/rates?base=EUR&quotes=A,B,C` | **Live rates** for the currencies on screen, in a single request. |
+| `GET /v2/rates?base=EUR` | **Every rate** — all currencies in one ~10 KB response, kept for offline use. |
 | `GET /v2/currencies` | Currency display names, cached once. |
 
-**Every pair is crossed from EUR.** Both live and cached rates are fetched against EUR,
-and any other pair is triangulated locally:
+**One small download, only when it is stale.** Rates are published about once a day, so
+the app downloads them when it comes to the foreground with rates older than an hour (or
+none), and when you tap refresh. Picking, swapping and watching currencies need no
+network. A typical user makes a few requests a day; each one names the app in its
+`User-Agent`. Frankfurter is free with no quotas, only rate-limited against abuse.
+
+**Every pair is crossed from EUR**, triangulated locally:
 
 ```
 rate(A → B) = rate(EUR → B) / rate(EUR → A)
@@ -45,7 +49,9 @@ at while online. It is also more precise than asking for the pair directly. A pa
 printed to a few decimals, which is plenty for EUR → HKD (8.9136) but leaves two or three
 digits from a currency with small units: 1,000,000 KRW → GBP comes out as 560.00 instead
 of 556.39, and IDR → gold as 0. The EUR legs keep five significant digits, so the cross
-stays within about 0.002% for every pair. Two details the API forces you to handle, both of which the app respects:
+stays within about 0.002% for every pair.
+
+Two details the API forces you to handle, both of which the app respects:
 
 - `/v2/rates` returns a **flat JSON array**, not a map keyed by currency.
 - Quote **dates differ per currency** — illiquid ones lag by a day — so the date is stored
@@ -79,7 +85,11 @@ $ANDROID_HOME/build-tools/36.1.0/apksigner sign --ks my-release.keystore \
 
 JVM (`app/src/test`) — conversion math including cross rates and unknown currencies,
 Frankfurter parsing against recorded payloads via MockWebServer (single object, flat
-array, per-quote dates, `422 invalid currency`), and amount parsing for `1,5` / `1.5`.
+array, per-quote dates, `422 invalid currency`, the `User-Agent`), amount parsing for
+`1,5` / `1.5`, swapping, and `ScreenSizesTest`: the screen rendered with Roborazzi on
+11 configurations, small phone to tablet, portrait and landscape, up to 2x font.
+`./gradlew recordRoborazziDebug` writes them to `app/screenshots/`,
+`./gradlew verifyRoborazziDebug` fails if any changed.
 
 Instrumented (`app/src/androidTest`), run on a real device against the live API — launch
 and convert, amount changes, swap, currency picker, watchlist add/remove, refresh, and the

@@ -35,19 +35,6 @@ class RatesRepository(
         snapshot
     }
 
-    /**
-     * Freshest value for one pair via `/v2/rate/{base}/{quote}`, used to confirm
-     * the headline conversion rather than relying on the triangulated snapshot.
-     */
-    suspend fun livePair(from: String, to: String): Result<RateDto> = runCatching {
-        api.rate(from, to)
-    }
-
-    /** Several quotes in one call via `/v2/rates?base=&quotes=`, for the watchlist. */
-    suspend fun liveQuotes(base: String, quotes: List<String>): Result<List<RateDto>> = runCatching {
-        if (quotes.isEmpty()) emptyList() else api.rates(base, quotes)
-    }
-
     companion object {
         fun create(context: Context): RatesRepository =
             RatesRepository(FrankfurterApi(), RatesCache(context.applicationContext))
