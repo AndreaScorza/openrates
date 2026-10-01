@@ -32,6 +32,7 @@ const val ABOUT_SHEET_TAG = "about_sheet"
 
 private const val SOURCE_URL = "https://github.com/AndreaScorza/openrates"
 private const val FRANKFURTER_URL = "https://frankfurter.dev"
+private const val PRIVACY_URL = "https://andreascorza.github.io/openrates/privacy/"
 private const val APACHE = "Apache License 2.0"
 
 /** A library the app ships, with the license it is distributed under. */
@@ -101,6 +102,10 @@ fun AboutSheet(onDismiss: () -> Unit) {
                 }
                 OutlinedButton(onClick = { uriHandler.openUri(FRANKFURTER_URL) }) {
                     Text("frankfurter.dev")
+                }
+                // Google Play requires the policy to be reachable from inside the app.
+                OutlinedButton(onClick = { uriHandler.openUri(PRIVACY_URL) }) {
+                    Text("Privacy policy")
                 }
             }
 

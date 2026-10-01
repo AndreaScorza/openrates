@@ -140,6 +140,13 @@ published by the European Central Bank and other central banks. Open-source lice
 listed in the app, under About.
 Frankfurter is free and needs no API key; please be kind to it.
 
+## Privacy
+
+OpenRates collects no personal data. The [privacy policy](https://andreascorza.github.io/openrates/privacy/)
+(source: `docs/privacy/index.html`, published with GitHub Pages) explains what stays on the
+device and what reaches Frankfurter; it is linked from the app's About sheet, as Google
+Play requires.
+
 ## License
 
 OpenRates is free software under the

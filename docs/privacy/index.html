@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OpenRates Privacy Policy</title>
+<meta name="description" content="Privacy policy of OpenRates, the ad-free currency converter for Android.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --ground: #ffffff;
+    --ink: #14181a;
+    --muted: #4f5656;
+    --line: #dde1e1;
+    --tag: #eef1f1;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ground: #0a0c0d; --ink: #f2f4f4; --muted: #aeb4b4; --line: #2e3234; --tag: #171b1d; }
+  }
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding: 40px 16px 64px;
+  }
+  main { max-width: 680px; margin: 0 auto; }
+  nav { display: flex; gap: 8px; margin-bottom: 32px; }
+  nav a {
+    color: var(--ink); text-decoration: none; font-size: 14px;
+    border: 1px solid var(--line); border-radius: 999px; padding: 6px 14px;
+  }
+  nav a:hover, nav a:focus-visible { background: var(--tag); }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 4px; }
+  h2 { font-size: 18px; margin: 32px 0 8px; }
+  .date { color: var(--muted); margin: 0 0 24px; font-size: 14px; }
+  .summary { background: var(--tag); border-radius: 12px; padding: 16px 18px; margin: 0; }
+  p, ul { margin: 0 0 12px; }
+  ul { padding-left: 20px; }
+  a { color: inherit; }
+  section + section { border-top: 1px solid var(--line); margin-top: 56px; padding-top: 40px; }
+  code { font-size: 14px; }
+</style>
+</head>
+<body>
+<main>
+  <nav aria-label="Language">
+    <a href="#en" lang="en">English</a>
+    <a href="#it" lang="it">Italiano</a>
+  </nav>
+
+  <section id="en" lang="en">
+    <h1>OpenRates privacy policy</h1>
+    <p class="date">Effective 2 October 2026</p>
+
+    <p class="summary">OpenRates does not collect, store or share any personal data. It has no account, no ads, no analytics and no tracking. The developer runs no server and receives no data from the app.</p>
+
+    <h2>What stays on your device</h2>
+    <p>The app saves the amount you typed, the currencies you picked, your watchlist, and the exchange rates and currency names it downloaded. They are kept only in the app's private storage on your phone, so it remembers your choices and works offline. They are deleted when you uninstall the app or clear its data.</p>
+    <p>If you have turned on Android's device backup, Android may include this app data in your backup, which is handled by Google under your Google account settings. The developer has no access to it.</p>
+
+    <h2>What the app sends over the internet</h2>
+    <p>To get exchange rates, the app connects directly to the Frankfurter API (<code>api.frankfurter.dev</code>), a free service that publishes reference rates from the European Central Bank and other central banks. The API is delivered through Cloudflare, a network provider.</p>
+    <ul>
+      <li>The requests contain no personal information: only which rates are wanted (all rates against the euro, and the list of currency names) and the app's name and version.</li>
+      <li>Like any website you visit, Frankfurter and Cloudflare receive your device's IP address and the time of the request, which they need to send the answer back.</li>
+      <li>The app downloads rates when you open it with rates more than an hour old, and when you tap refresh.</li>
+    </ul>
+
+    <h2>Links</h2>
+    <p>The "Source code", "Privacy policy" and "frankfurter.dev" buttons in the app open those pages in your browser, where the website's own policy applies.</p>
+
+    <h2>Permissions</h2>
+    <p>The app asks for one permission, internet access, to download exchange rates.</p>
+
+    <h2>Children</h2>
+    <p>The app is not directed at children, and it collects no personal data from anyone, children included.</p>
+
+    <h2>Google Play</h2>
+    <p>If you download the app from Google Play, the download and any purchase history are handled by Google under its own privacy policy.</p>
+
+    <h2>Changes</h2>
+    <p>If this policy changes, the new version is published on this page with a new date. The app's source code is public, so anyone can check what it does: <a href="https://github.com/AndreaScorza/openrates">github.com/AndreaScorza/openrates</a>.</p>
+
+    <h2>Contact</h2>
+    <p>Andrea Scorza, developer of OpenRates. Write to the developer email shown on the app's Google Play page, or open an issue at <a href="https://github.com/AndreaScorza/openrates/issues">github.com/AndreaScorza/openrates/issues</a>.</p>
+  </section>
+
+  <section id="it" lang="it">
+    <h1>Informativa sulla privacy di OpenRates</h1>
+    <p class="date">In vigore dal 2 ottobre 2026</p>
+
+    <p class="summary">OpenRates non raccoglie, non conserva e non condivide alcun dato personale. Non ha account, pubblicità, statistiche d'uso né tracciamento. Lo sviluppatore non gestisce alcun server e non riceve alcun dato dall'app.</p>
+
+    <h2>Cosa resta sul tuo dispositivo</h2>
+    <p>L'app salva l'importo che hai inserito, le valute scelte, la tua lista di valute preferite, e i tassi di cambio e i nomi delle valute che ha scaricato. Sono conservati solo nella memoria privata dell'app sul tuo telefono, così l'app ricorda le tue scelte e funziona offline. Vengono cancellati quando disinstalli l'app o ne cancelli i dati.</p>
+    <p>Se hai attivato il backup del dispositivo Android, Android può includere questi dati nel tuo backup, gestito da Google secondo le impostazioni del tuo account Google. Lo sviluppatore non vi ha accesso.</p>
+
+    <h2>Cosa l'app invia tramite internet</h2>
+    <p>Per ottenere i tassi di cambio, l'app si collega direttamente all'API Frankfurter (<code>api.frankfurter.dev</code>), un servizio gratuito che pubblica i tassi di riferimento della Banca centrale europea e di altre banche centrali. L'API è distribuita tramite Cloudflare, un fornitore di rete.</p>
+    <ul>
+      <li>Le richieste non contengono informazioni personali: solo quali tassi servono (tutti i tassi rispetto all'euro e l'elenco dei nomi delle valute) e il nome e la versione dell'app.</li>
+      <li>Come qualsiasi sito web che visiti, Frankfurter e Cloudflare ricevono l'indirizzo IP del tuo dispositivo e l'ora della richiesta, necessari per inviare la risposta.</li>
+      <li>L'app scarica i tassi quando la apri con tassi vecchi di più di un'ora e quando tocchi aggiorna.</li>
+    </ul>
+
+    <h2>Link</h2>
+    <p>I pulsanti "Source code", "Privacy policy" e "frankfurter.dev" nell'app aprono quelle pagine nel tuo browser, dove si applica l'informativa del sito stesso.</p>
+
+    <h2>Autorizzazioni</h2>
+    <p>L'app chiede una sola autorizzazione, l'accesso a internet, per scaricare i tassi di cambio.</p>
+
+    <h2>Minori</h2>
+    <p>L'app non è rivolta ai minori e non raccoglie dati personali da nessuno, minori compresi.</p>
+
+    <h2>Google Play</h2>
+    <p>Se scarichi l'app da Google Play, il download e l'eventuale cronologia degli acquisti sono gestiti da Google secondo la sua informativa sulla privacy.</p>
+
+    <h2>Modifiche</h2>
+    <p>Se questa informativa cambia, la nuova versione viene pubblicata su questa pagina con una nuova data. Il codice sorgente dell'app è pubblico, quindi chiunque può verificare cosa fa: <a href="https://github.com/AndreaScorza/openrates">github.com/AndreaScorza/openrates</a>.</p>
+
+    <h2>Contatti</h2>
+    <p>Andrea Scorza, sviluppatore di OpenRates. Scrivi all'indirizzo email dello sviluppatore indicato nella pagina dell'app su Google Play, oppure apri una segnalazione su <a href="https://github.com/AndreaScorza/openrates/issues">github.com/AndreaScorza/openrates/issues</a>.</p>
+  </section>
+</main>
+</body>
+</html>
