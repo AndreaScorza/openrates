@@ -2,15 +2,23 @@ package com.andrea.openrates.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.clickable
@@ -18,6 +26,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -46,6 +55,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 /** Stable identifiers the instrumented end-to-end tests drive the screen with. */
 object Tags {
@@ -77,10 +87,14 @@ fun ConverterScreen(
 ) {
     var picker by remember { mutableStateOf<PickerTarget?>(null) }
 
+    // safeDrawing rather than the default system bars: it adds the keyboard, so the
+    // screen stays scrollable above it, and the camera cutout when held sideways.
     Scaffold(
+        contentWindowInsets = WindowInsets.safeDrawing,
         topBar = {
             TopAppBar(
                 title = { Text("OpenRates") },
+                windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
                 actions = {
                     IconButton(
                         onClick = onRefresh,
@@ -102,11 +116,19 @@ fun ConverterScreen(
             )
         },
     ) { padding ->
+        // The whole width scrolls, but the content stops growing at a phone-like
+        // width and centres: on a tablet or a phone held sideways the cards keep
+        // their phone proportions instead of stretching edge to edge.
         Column(
             modifier = Modifier
                 .padding(padding)
+                .fillMaxSize()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+        Column(
+            modifier = Modifier.widthIn(max = MaxContentWidth).fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             StatusLine(state)
@@ -124,6 +146,7 @@ fun ConverterScreen(
                 onAdd = { picker = PickerTarget.Watch },
             )
             Box(Modifier.padding(bottom = 24.dp))
+        }
         }
     }
 
@@ -154,6 +177,15 @@ fun ConverterScreen(
 }
 
 private enum class PickerTarget { From, To, Watch }
+
+/** Wide enough for a large phone's layout, narrow enough that a tablet doesn't stretch it. */
+private val MaxContentWidth = 560.dp
+
+/**
+ * Below this card width (small phones, or "Display size: largest") the currency
+ * pills slim down so the amount keeps room for its digits.
+ */
+private val NarrowCardWidth = 300.dp
 
 /** "Updated 3 min ago · rates for 2026-09-02", or the offline explanation. */
 @Composable
@@ -199,10 +231,9 @@ private fun ConversionCard(
     onPickTo: () -> Unit,
 ) {
     Card(colors = CardDefaults.elevatedCardColors()) {
-        Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+        BoxWithConstraints(Modifier.padding(20.dp)) {
+        val narrow = maxWidth < NarrowCardWidth
+        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -213,7 +244,11 @@ private fun ConversionCard(
                     label = { Text("Amount") },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
-                    textStyle = MaterialTheme.typography.headlineSmall,
+                    textStyle = if (narrow) {
+                        MaterialTheme.typography.titleLarge
+                    } else {
+                        MaterialTheme.typography.headlineSmall
+                    },
                     // Clearing also clears what is remembered for the next launch:
                     // onAmountChange persists every edit, blank included.
                     trailingIcon = {
@@ -240,6 +275,7 @@ private fun ConversionCard(
                     name = state.names[state.from],
                     onClick = onPickFrom,
                     tag = Tags.FROM,
+                    narrow = narrow,
                 )
             }
 
@@ -269,6 +305,13 @@ private fun ConversionCard(
                     style = MaterialTheme.typography.headlineMedium,
                     fontFamily = FontFamily.SansSerif,
                     textAlign = TextAlign.Start,
+                    // A big amount into a currency like IDR shrinks to fit one line
+                    // instead of breaking the number in two.
+                    maxLines = 1,
+                    autoSize = TextAutoSize.StepBased(
+                        minFontSize = 14.sp,
+                        maxFontSize = MaterialTheme.typography.headlineMedium.fontSize,
+                    ),
                     modifier = Modifier.weight(1f).testTag(Tags.RESULT),
                 )
                 CurrencyChip(
@@ -276,6 +319,7 @@ private fun ConversionCard(
                     name = state.names[state.to],
                     onClick = onPickTo,
                     tag = Tags.TO,
+                    narrow = narrow,
                 )
             }
 
@@ -288,15 +332,25 @@ private fun ConversionCard(
                 )
             }
         }
+        }
     }
 }
 
 @Composable
-private fun CurrencyChip(code: String, name: String?, onClick: () -> Unit, tag: String) {
+private fun CurrencyChip(
+    code: String,
+    name: String?,
+    onClick: () -> Unit,
+    tag: String,
+    narrow: Boolean,
+) {
+    // Narrow pills trim the padding by the same 24dp as the width, so the code
+    // itself keeps the same room and still fits at large font sizes.
     FilledTonalButton(
         onClick = onClick,
+        contentPadding = if (narrow) PaddingValues(horizontal = 12.dp) else ButtonDefaults.ContentPadding,
         modifier = Modifier
-            .width(112.dp)
+            .width(if (narrow) 88.dp else 112.dp)
             .testTag(tag)
             .semantics { contentDescription = name?.let { "$code, $it" } ?: code },
     ) {
@@ -375,6 +429,7 @@ private fun WatchlistCard(
                     Text(
                         text = value?.let { Format.amount(it) } ?: "\u2014",
                         style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
                     )
                     IconButton(
                         onClick = { onRemove(code) },
