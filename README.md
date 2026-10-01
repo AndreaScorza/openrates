@@ -119,12 +119,13 @@ and converts every pair, and a failed refresh never destroys the last good snaps
 app/src/main/java/com/andrea/openrates/
 ├── data/
 │   ├── Conversion.kt        cross-rate math (pure, no Android deps)
-│   ├── FrankfurterApi.kt    the four endpoints above
+│   ├── FrankfurterApi.kt    the API client
 │   ├── Models.kt            wire + cache models
 │   ├── RatesCache.kt        atomic JSON cache in filesDir
 │   ├── RatesRepository.kt   cache-first, network-when-possible
 │   └── Settings.kt          remembered pair, amount, watchlist
 ├── ui/
+│   ├── AboutSheet.kt        version, rate source, open-source licenses
 │   ├── ConverterScreen.kt   the single screen
 │   ├── ConverterViewModel.kt
 │   ├── CurrencyPickerSheet.kt
@@ -134,7 +135,9 @@ app/src/main/java/com/andrea/openrates/
 
 ## Credits
 
-Rates from [Frankfurter](https://frankfurter.dev), published by the European Central Bank.
+Rates from [Frankfurter](https://frankfurter.dev), which collects reference rates
+published by the European Central Bank and other central banks. Open-source licenses are
+listed in the app, under About.
 Frankfurter is free and needs no API key; please be kind to it.
 
 ## License

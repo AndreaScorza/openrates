@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SwapVert
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -70,6 +71,7 @@ object Tags {
     const val STATUS = "status_text"
     const val WATCHLIST = "watchlist"
     const val ADD_WATCH = "add_watch_button"
+    const val ABOUT = "about_button"
     fun currency(code: String) = "currency_$code"
     fun watchRow(code: String) = "watch_$code"
 }
@@ -86,6 +88,7 @@ fun ConverterScreen(
     onToggleWatch: (String) -> Unit,
 ) {
     var picker by remember { mutableStateOf<PickerTarget?>(null) }
+    var showAbout by remember { mutableStateOf(false) }
 
     // safeDrawing rather than the default system bars: it adds the keyboard, so the
     // screen stays scrollable above it, and the camera cutout when held sideways.
@@ -96,6 +99,14 @@ fun ConverterScreen(
                 title = { Text("OpenRates") },
                 windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal),
                 actions = {
+                    IconButton(
+                        onClick = { showAbout = true },
+                        modifier = Modifier
+                            .testTag(Tags.ABOUT)
+                            .semantics { contentDescription = "About" },
+                    ) {
+                        Icon(Icons.Outlined.Info, contentDescription = null)
+                    }
                     IconButton(
                         onClick = onRefresh,
                         enabled = !state.isRefreshing,
@@ -149,6 +160,8 @@ fun ConverterScreen(
         }
         }
     }
+
+    if (showAbout) AboutSheet(onDismiss = { showAbout = false })
 
     picker?.let { target ->
         CurrencyPickerSheet(
