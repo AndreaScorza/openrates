@@ -10,3 +10,8 @@
 local.properties
 /app/build
 /app/release
+
+# Release signing: the upload key and its passwords never enter the repo.
+keystore.properties
+*.jks
+*.keystore

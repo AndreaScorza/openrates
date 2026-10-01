@@ -66,20 +66,37 @@ Requires JDK 17 and the Android SDK (compileSdk 36).
 
 ```bash
 ./gradlew installDebug          # build and install on a connected device
-./gradlew test                  # JVM unit tests: conversion math, API parsing
-./gradlew connectedAndroidTest  # end-to-end tests on a connected device
-./gradlew assembleRelease       # minified release APK (~1.5 MB, unsigned)
+./gradlew test                  # JVM unit tests, including the screen-size screenshots
+./gradlew connectedAndroidTest  # end-to-end tests on a connected device (uninstalls the app after)
+./gradlew assembleRelease       # minified release APK (~1.5 MB)
+./gradlew bundleRelease         # signed App Bundle for Google Play
 ```
 
 `local.properties` needs `sdk.dir=/path/to/Android/Sdk` (it is gitignored; Android Studio
 writes it for you).
 
-To ship a release build, add a signing config or sign the unsigned APK yourself:
+### Release signing
+
+Release builds are signed when `keystore.properties` exists at the project root, and left
+unsigned otherwise (that is what CI builds). Create the upload key once, outside the repo:
 
 ```bash
-$ANDROID_HOME/build-tools/36.1.0/apksigner sign --ks my-release.keystore \
-    --out openrates.apk app/build/outputs/apk/release/app-release-unsigned.apk
+keytool -genkeypair -v -keystore ~/openrates-upload.jks -alias upload \
+    -keyalg RSA -keysize 2048 -validity 10000
 ```
+
+then `keystore.properties` (gitignored, like `*.jks`):
+
+```properties
+storeFile=/home/you/openrates-upload.jks
+storePassword=...
+keyAlias=upload
+keyPassword=...
+```
+
+`./gradlew bundleRelease` then writes `app/build/outputs/bundle/release/app-release.aab`.
+Back up the key and its passwords: with Play App Signing a lost upload key can be reset,
+but only through Play support. Each upload needs a higher `versionCode`.
 
 ## Tests
 
